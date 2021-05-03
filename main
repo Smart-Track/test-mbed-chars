@@ -3,22 +3,18 @@
 
 Serial pc(USBTX, USBRX);    // PC serial interface
 
-DigitalIn pb(p6);           // push button for starting a test. does not require start on the GUI to be pressed
-
 char testArray[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 char cr = '\n';
 char lf = '\r';
 
 int main()
 {
-    // Set pb mode
-    pb.mode(PullUp);
-    
-    // Wait for pb input to start
-    while(1) {
-        if (pb ==0) {
+    //wait for start char from GUI
+    while (1) {
+        if (pc.getc() == 'S') {
             break;
         }
+        wait_ms(50);
     }
     
     int i = 0;
@@ -48,4 +44,12 @@ int main()
     // same interval before ending the race, happens when finish line is crossed for the last time
     wait_ms(1567);
     pc.putc(testArray[i]);
+    
+    // wait for reset to start another race
+    while(1) {
+        if (pc.getc() == 'R') {
+            mbed_reset();
+        }
+        Thread::wait(50);
+    }
 }
